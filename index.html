@@ -78,6 +78,103 @@
     transition: border-color .2s, color .2s, background .2s;
   }
   .nav-cta:hover { border-color: var(--gold); color: var(--gold); }
+  .auth-email {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-right: 10px;
+  }
+  .auth-shell {
+    max-width: 680px;
+    margin: 0 auto 24px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 26px 28px;
+  }
+  .auth-shell h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .auth-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 14px; }
+  .auth-status {
+    margin-top: 10px;
+    font-size: 0.84rem;
+    color: var(--muted);
+    min-height: 1.2em;
+  }
+  .google-btn {
+    width: 100%;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--charcoal);
+    background: #fff;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 11px 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .google-btn:hover {
+    border-color: var(--gold-soft);
+    box-shadow: 0 4px 16px rgba(201,151,62,0.10);
+  }
+  .google-mark {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: conic-gradient(from 45deg, #4285F4 0 25%, #34A853 25% 50%, #FBBC05 50% 75%, #EA4335 75% 100%);
+    flex-shrink: 0;
+  }
+  .auth-status.error { color: #B42318; }
+  .auth-status.success { color: #027A48; }
+  .auth-shell.hidden { display: none; }
+  .session-shell {
+    max-width: 680px;
+    margin: 0 auto 24px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .session-shell[hidden] { display: none; }
+  .session-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .session-title {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--charcoal);
+  }
+  .session-email {
+    font-size: 0.84rem;
+    color: var(--muted);
+  }
+  .session-switch {
+    font: inherit;
+    font-size: 0.82rem;
+    color: var(--ocean);
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+  }
+  .session-switch:hover { text-decoration: underline; }
 
   /* HERO */
   .hero { padding: 80px 0 32px; text-align: center; }
@@ -289,6 +386,37 @@
   }
   .hint { color: var(--muted); font-size: 0.85rem; }
   .results .sub { color: var(--muted); margin-bottom: 24px; }
+  .calendar-sync {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--warm-white);
+  }
+  .calendar-sync-text {
+    font-size: 0.86rem;
+    color: var(--muted);
+  }
+  .calendar-sync-btn {
+    font: inherit;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--ivory);
+    background: var(--charcoal);
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  .calendar-sync-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
 
   .cal-shell {
     background: var(--card);
@@ -588,6 +716,25 @@
 </header>
 
 <section class="wrap">
+  <div class="auth-shell" id="auth-shell">
+    <h2>Continue with Google</h2>
+    <p class="auth-sub">Use your Google account to access the planner.</p>
+    <div>
+      <button class="google-btn" type="button" id="google-login">
+        <span class="google-mark" aria-hidden="true"></span>
+        <span>Continue with Google</span>
+      </button>
+    </div>
+    <p class="auth-status" id="auth-status"></p>
+  </div>
+  <div class="session-shell" id="session-shell" hidden>
+    <div class="session-copy">
+      <span class="session-title">You are logged in</span>
+      <span class="session-email" id="session-email"></span>
+    </div>
+    <button class="session-switch" id="session-switch" type="button">Use a different account</button>
+  </div>
+
   <div class="chat-planner" id="planner">
     <div class="chat-progress-track">
       <div class="chat-progress-bar" id="chat-bar"></div>
@@ -723,6 +870,10 @@
     </div>
     <span class="hint">Drag any block to a different time or day</span>
   </div>
+  <div class="calendar-sync">
+    <span class="calendar-sync-text" id="calendar-sync-status">Connect Google Calendar to sync this itinerary.</span>
+    <button class="calendar-sync-btn" id="calendar-sync-btn" type="button">Sync to Google Calendar</button>
+  </div>
 
   <div class="cal-shell">
     <div class="cal-headrow" id="cal-head"></div>
@@ -773,7 +924,136 @@
   <div class="wrap">© 2026 LumaTrip.AI · Made with intention in Bali</div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+  const SUPABASE_URL = "https://lmojwxitlwdpzulagvas.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_gtTsm4Ge2VxOduIk9RjMZw_TAKP5znQ";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+  const plannerEl = document.getElementById("planner");
+  const navCtaEl = document.querySelector(".nav-cta");
+  const navInnerEl = document.querySelector(".nav-inner");
+
+  const authShellEl = document.getElementById("auth-shell");
+  const googleLoginEl = document.getElementById("google-login");
+  const authStatusEl = document.getElementById("auth-status");
+  const sessionShellEl = document.getElementById("session-shell");
+  const sessionEmailEl = document.getElementById("session-email");
+  const sessionSwitchEl = document.getElementById("session-switch");
+  const calendarSyncBtnEl = document.getElementById("calendar-sync-btn");
+  const calendarSyncStatusEl = document.getElementById("calendar-sync-status");
+  let googleAccessToken = null;
+
+  function setAuthStatus(message, type) {
+    authStatusEl.textContent = message || "";
+    authStatusEl.classList.remove("error", "success");
+    if (type) authStatusEl.classList.add(type);
+  }
+
+  function setPlannerEnabled(isEnabled) {
+    plannerEl.style.opacity = isEnabled ? "1" : "0.5";
+    plannerEl.style.pointerEvents = isEnabled ? "auto" : "none";
+    navCtaEl.disabled = !isEnabled;
+    navCtaEl.textContent = isEnabled ? "Plan a trip" : "Log in to plan";
+  }
+
+
+  function removeAuthEmailChip() {
+    const chip = document.getElementById("auth-email-chip");
+    if (chip) chip.remove();
+  }
+
+  function removeLogoutButton() {
+    const logout = document.getElementById("logout-btn");
+    if (logout) logout.remove();
+  }
+
+  function renderLoggedInNav(email) {
+    removeAuthEmailChip();
+    removeLogoutButton();
+
+    const emailChip = document.createElement("span");
+    emailChip.id = "auth-email-chip";
+    emailChip.className = "auth-email";
+    emailChip.textContent = email;
+
+    const logoutBtn = document.createElement("button");
+    logoutBtn.id = "logout-btn";
+    logoutBtn.className = "nav-cta";
+    logoutBtn.textContent = "Sign out";
+    logoutBtn.addEventListener("click", async () => {
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) setAuthStatus(error.message || "Sign out failed.", "error");
+    });
+
+    navInnerEl.appendChild(emailChip);
+    navInnerEl.appendChild(logoutBtn);
+  }
+
+  async function applyAuthState() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const user = session?.user || null;
+    const isLoggedIn = Boolean(user);
+    googleAccessToken = session?.provider_token || null;
+
+    setPlannerEnabled(isLoggedIn);
+    if (isLoggedIn) {
+      renderLoggedInNav(user.email || "Logged in");
+      sessionEmailEl.textContent = user.email || "Authenticated user";
+      sessionShellEl.hidden = false;
+      authShellEl.classList.add("hidden");
+      setAuthStatus("You're logged in and ready to plan.", "success");
+      document.getElementById("results").hidden = true;
+      if (googleAccessToken) {
+        calendarSyncStatusEl.textContent = "Google Calendar connected. Generate your journey, then sync it.";
+      } else {
+        calendarSyncStatusEl.textContent = "Google login active. Reconnect Google to grant Calendar permissions.";
+      }
+    } else {
+      removeAuthEmailChip();
+      removeLogoutButton();
+      sessionShellEl.hidden = true;
+      authShellEl.classList.remove("hidden");
+      setAuthStatus("");
+      calendarSyncStatusEl.textContent = "Connect Google Calendar to sync this itinerary.";
+    }
+  }
+
+  googleLoginEl.addEventListener("click", async () => {
+    googleLoginEl.disabled = true;
+    setAuthStatus("Redirecting to Google...");
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        scopes: "openid email profile https://www.googleapis.com/auth/calendar.events",
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+          include_granted_scopes: "true",
+        },
+        redirectTo: window.location.origin + window.location.pathname,
+      },
+    });
+    googleLoginEl.disabled = false;
+    if (error) setAuthStatus(error.message || "Google login failed.", "error");
+  });
+
+  sessionSwitchEl.addEventListener("click", async () => {
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) {
+      setAuthStatus(error.message || "Could not switch account.", "error");
+      return;
+    }
+    setAuthStatus("");
+  });
+
+  supabaseClient.auth.onAuthStateChange(() => {
+    applyAuthState();
+  });
+
+  setPlannerEnabled(false);
+  applyAuthState();
+
   // --- Curated Bali experiences (small library; tagged) ---
   const EXPERIENCES = [
     { id:"e1",  name:"Crate Café, Canggu",         img:"https://images.unsplash.com/photo-1453614512568-c4024d13c247?auto=format&fit=crop&w=900&q=70", tags:["cafe","creator","slow"],                   defaultStart:8.5,  duration:1.5, why:"Slow ivory breakfast where surfers and creators ease into the day." },
@@ -1024,6 +1304,73 @@
     return d;
   }
 
+  function buildDateTimeForEvent(baseIsoDate, dayOffset, hourDecimal) {
+    const base = dateAtOffset(baseIsoDate, dayOffset);
+    const hours = Math.floor(hourDecimal);
+    const minutes = Math.round((hourDecimal - hours) * 60);
+    base.setHours(hours, minutes, 0, 0);
+    return base;
+  }
+
+  async function insertEventToGoogleCalendar(accessToken, item) {
+    const exp = getExp(item.expId);
+    if (!exp) return;
+    const start = buildDateTimeForEvent(state.start, item.day, item.startHour);
+    const end = new Date(start.getTime() + item.duration * 60 * 60 * 1000);
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+
+    const payload = {
+      summary: exp.name,
+      description: `LumaTrip itinerary\n\n${exp.why}`,
+      start: {
+        dateTime: start.toISOString(),
+        timeZone: tz,
+      },
+      end: {
+        dateTime: end.toISOString(),
+        timeZone: tz,
+      },
+    };
+
+    const response = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(body || "Google Calendar API request failed");
+    }
+  }
+
+  async function syncScheduleToGoogleCalendar() {
+    if (!googleAccessToken) {
+      calendarSyncStatusEl.textContent = "Calendar permission missing. Please sign in with Google again.";
+      return;
+    }
+    if (!state.schedule.length) {
+      calendarSyncStatusEl.textContent = "Generate your journey first, then sync it to calendar.";
+      return;
+    }
+
+    calendarSyncBtnEl.disabled = true;
+    calendarSyncStatusEl.textContent = "Syncing itinerary to Google Calendar...";
+    try {
+      for (const item of state.schedule) {
+        await insertEventToGoogleCalendar(googleAccessToken, item);
+      }
+      calendarSyncStatusEl.textContent = `Synced ${state.schedule.length} events to your Google Calendar.`;
+    } catch (error) {
+      calendarSyncStatusEl.textContent = "Calendar sync failed. Reconnect Google and try again.";
+    } finally {
+      calendarSyncBtnEl.disabled = false;
+    }
+  }
+
   // --- Render calendar ---
   function renderCalendar() {
     const days = dayCount(state.start, state.end);
@@ -1062,6 +1409,7 @@
 
     // Place events
     state.schedule.forEach(renderEvent);
+    calendarSyncBtnEl.disabled = false;
   }
 
   function renderEvent(s) {
@@ -1326,6 +1674,10 @@
       activeDrag = null;
     });
   }
+
+  calendarSyncBtnEl.addEventListener("click", () => {
+    syncScheduleToGoogleCalendar();
+  });
 </script>
 </body>
 </html>
