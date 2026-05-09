@@ -942,7 +942,18 @@
   const sessionSwitchEl = document.getElementById("session-switch");
   const calendarSyncBtnEl = document.getElementById("calendar-sync-btn");
   const calendarSyncStatusEl = document.getElementById("calendar-sync-status");
+  const TOKEN_STORAGE_KEY = "luma_google_provider_token";
   let googleAccessToken = null;
+
+  function persistGoogleAccessToken(token) {
+    googleAccessToken = token || null;
+    if (googleAccessToken) localStorage.setItem(TOKEN_STORAGE_KEY, googleAccessToken);
+    else localStorage.removeItem(TOKEN_STORAGE_KEY);
+  }
+
+  function getStoredGoogleAccessToken() {
+    return localStorage.getItem(TOKEN_STORAGE_KEY);
+  }
 
   function setAuthStatus(message, type) {
     authStatusEl.textContent = message || "";
@@ -994,7 +1005,8 @@
     const { data: { session } } = await supabaseClient.auth.getSession();
     const user = session?.user || null;
     const isLoggedIn = Boolean(user);
-    googleAccessToken = session?.provider_token || null;
+    if (session?.provider_token) persistGoogleAccessToken(session.provider_token);
+    else googleAccessToken = getStoredGoogleAccessToken();
 
     setPlannerEnabled(isLoggedIn);
     if (isLoggedIn) {
@@ -1010,6 +1022,7 @@
         calendarSyncStatusEl.textContent = "Google login active. Reconnect Google to grant Calendar permissions.";
       }
     } else {
+      persistGoogleAccessToken(null);
       removeAuthEmailChip();
       removeLogoutButton();
       sessionShellEl.hidden = true;
@@ -1044,10 +1057,12 @@
       setAuthStatus(error.message || "Could not switch account.", "error");
       return;
     }
+    persistGoogleAccessToken(null);
     setAuthStatus("");
   });
 
-  supabaseClient.auth.onAuthStateChange(() => {
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    if (session?.provider_token) persistGoogleAccessToken(session.provider_token);
     applyAuthState();
   });
 
@@ -1342,8 +1357,15 @@
     });
 
     if (!response.ok) {
-      const body = await response.text();
-      throw new Error(body || "Google Calendar API request failed");
+      const bodyText = await response.text();
+      let message = bodyText || "Google Calendar API request failed";
+      try {
+        const parsed = JSON.parse(bodyText);
+        message = parsed?.error?.message || message;
+      } catch (_error) {
+        // keep raw body text when JSON parsing fails
+      }
+      throw new Error(`HTTP ${response.status}: ${message}`);
     }
   }
 
@@ -1365,7 +1387,11 @@
       }
       calendarSyncStatusEl.textContent = `Synced ${state.schedule.length} events to your Google Calendar.`;
     } catch (error) {
-      calendarSyncStatusEl.textContent = "Calendar sync failed. Reconnect Google and try again.";
+      const msg = String(error?.message || "");
+      if (msg.includes("401") || msg.includes("403")) {
+        persistGoogleAccessToken(null);
+      }
+      calendarSyncStatusEl.textContent = `Calendar sync failed: ${msg || "Reconnect Google and try again."}`;
     } finally {
       calendarSyncBtnEl.disabled = false;
     }
